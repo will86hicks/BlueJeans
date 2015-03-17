@@ -24,12 +24,13 @@ def calcPopSize(numDVars, prop):
 
 #Select random chromosome for reproduction
 def selectMate(liChromObj):
-	rangeNum = round(random.uniform(0.0, 100.0), 1)#randrange(0, 100)
-	#print("Random Range = ",rangeNum, '\n')
+	rangeNum = round(random.uniform(0.0, 100.0), 1)
+	print("Random Range = ",rangeNum, '\n')
 
-	rangeNum = rangeNum 
+
 
 	for chromObj in liChromObj:
+		print("This is the chromosomes range ",chromObj.rangeMin, '-',chromObj.rangeMax)
 		if(chromObj.rangeMin <= rangeNum < chromObj.rangeMax):
 			return chromObj;
 
@@ -55,14 +56,19 @@ def openCNFFile(fileName):
     
 ### CLASSES ####
 class Chromosome:
-        name = ''
-        bitPattern = ''
-        fitnessValue = 0
-        fitnessRatio = 0
-        rangeMin = 0
-        rangeMax = 0
+	def _init_(self):
+		self.name = ''
+		self.bitPattern = ''
+		self.fitnessValue = 0
+		self.fitnessRatio = 0
+		self.rangeMin = 0
+		self.rangeMax = 0
+	def crossover(self, start, end):
+		return self.bitPattern[start:end]
+
 
 def GeneticAlgorithm():
+	random.seed()
 
 	#open the file that contains example CNF inputs for the Genetic Algorithm
 	#fileName = input("Please enter the file name that contains the CNF: ")
@@ -73,6 +79,7 @@ def GeneticAlgorithm():
 	#print("This is the CNF without parentheses or whitespace: ",CNF)
 	#print()
 
+	
 
 
 	###FIND DISTINCT VARIABLES(NUMBER OF GENES)
@@ -172,8 +179,10 @@ def GeneticAlgorithm():
 			tempCNF = CNF
 			outputIfSuccess = ""
     
+			#print("This is the chromosome that breaks",chromosome.name)
 			for i in range(0, numOfGenes):
 				varLetter = liDistinctVars[i]
+				#print("This is i = ", i)
 				#print("This is the letter variable", varLetter)
 				bitValue = chromosome.bitPattern[i]
 				#print("this is the bitvalue: ", bitValue)
@@ -222,7 +231,11 @@ def GeneticAlgorithm():
 				#Mutate one member of the population
 				memberMutatorNum = random.randrange(0, popSize)
 				geneMutatorNum = random.randrange(0, numOfGenes)
-				arrChromObj[memberMutatorNum].bitPattern[geneMutatorNum] = 0 if (arrChromObj[memberMutatorNum].bitPattern[geneMutatorNum] == 1) else 1
+				bPList = list(arrChromObj[memberMutatorNum].bitPattern)
+
+				bPList[geneMutatorNum] = '0' if (bPList[geneMutatorNum] == 1) else '1'
+				
+				arrChromObj[memberMutatorNum].bitPattern = ''.join(bPList)
 
 				###REPEAT(FIX For cleaner code)
 
@@ -289,7 +302,7 @@ def GeneticAlgorithm():
 
 			stringRange = str(round(chromObj.rangeMin, 2)) + "-" + str(round(chromObj.rangeMax, 2))
         
-			print("{0:24}{1:16}{2:8}{3:16.2f}{4:10}".format(chromObj.name,chromObj.bitPattern,chromObj.fitnessValue,chromObj.fitnessRatio,"               " + stringRange))
+			print("{0:20}{1:16}{2:8}{3:16.2f}{4:10}".format(chromObj.name,chromObj.bitPattern,chromObj.fitnessValue,chromObj.fitnessRatio,"               " + stringRange))
 
 
 
@@ -305,7 +318,15 @@ def GeneticAlgorithm():
 
 		while(reprodCount <= totalNumReproductions):
 			#pick a pair of chromosomes for crossover reproduction
-			maleChrom = selectMate(arrChromObj)
+
+			maleChrom = Chromosome()
+			femaleChrom = Chromosome()
+
+			selectedMate = selectMate(arrChromObj)
+			print("THIS IS THE name of the SELECTED MATE", selectedMate.name, '\n')
+			maleChrom.bitPattern = selectedMate.bitPattern#selectMate(arrChromObj).bitPattern
+			maleChrom.name = selectedMate.name
+
 			femaleChrom = selectMate(arrChromObj)
 
 			#you don't want it mating with itself
@@ -320,7 +341,7 @@ def GeneticAlgorithm():
 			randXoverPnt = random.randrange(1, numOfGenes)  
 			#print("This is the index of crossover ", randXoverPnt)
 	
-			lHSMale = maleChrom.bitPattern[0:randXoverPnt]
+			lHSMale = maleChrom.crossover(0,randXoverPnt)#maleChrom.bitPattern[0:randXoverPnt]
 			rHSMale = maleChrom.bitPattern[randXoverPnt: numOfGenes]
 
 			lHSFemale = femaleChrom.bitPattern[0:randXoverPnt]
@@ -353,6 +374,10 @@ def GeneticAlgorithm():
 		#Replace old generation with new generation and repeat for next generation until solution is found
 		arrChromObj = newGen
 		generationNum += 1
+
+		if(generationNum > 100):
+			print("The CNF", CNF, "has no solution")
+			return;
 		
 
 GeneticAlgorithm()
