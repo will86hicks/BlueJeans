@@ -38,6 +38,11 @@ def selectMate(liChromObj):
 	problem.name = "I'm not supposed to exist"
 	return problem;	
 
+def openCNFFile(fileName):
+	inFile = open(fileName, "r")
+	CNF = inFile.readline()
+	inFile.close()
+	return CNF;
     
 ### CLASSES ####
 class Chromosome:
@@ -51,13 +56,15 @@ class Chromosome:
 def GeneticAlgorithm():
 	#open the file that contains example CNF inputs for the Genetic Algorithm
 
-	inFile = open("GA.input", "r")
-	CNF = inFile.readline()
-	print("This is the original CNF read from the file:", CNF)
+#	inFile = open("GA.input", "r")
+#	CNF = inFile.readline()
+#	print("This is the original CNF read from the file:", CNF)
 
 	#close the file
-	inFile.close()
+#	inFile.close()
 
+	fileName = input("Please enter the file name that contains the CNF: ")
+	CNF = openCNFFile(fileName)
 
 	# Reformat the CNF so it's easy to parse
 
