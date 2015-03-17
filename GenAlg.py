@@ -1,16 +1,36 @@
+#Name:		Will Hicks
+#CLID:		wsh7290
+#Course:	CMPS 420-Artificial Intelligence
+#Professor:	Dr. Mark G. Radle
+#Assignment:	Genetic Algorithm
+#DueDate:	March 18, 2015
+#DueTime:	10:00 AM
+
+#I certify that this is completely an entirely my own work
+
+
+
 ###IMPORTING LIBRARIES
 
 
 import random 
 import re  #  Regular Expression Library
 import math
-#from decimal import *
-#import sys
+
+
+
+### CLASSES ####
+class Chromosome:
+	def _init_(self):
+		self.name = ''
+		self.bitPattern = ''
+		self.fitnessValue = 0
+		self.fitnessRatio = 0
+		self.rangeMin = 0
+		self.rangeMax = 0
 
 
 ### FUNCTIONS  ####
-
-#evaluate fitness value.
 
 # Find Population size
 def calcPopSize(numDVars, prop):
@@ -24,57 +44,58 @@ def calcPopSize(numDVars, prop):
 
 #Select random chromosome for reproduction
 def selectMate(liChromObj):
-	rangeNum = round(random.uniform(0.0, 100.0), 1)
-	print("Random Range = ",rangeNum, '\n')
+	problemDetected = False
+	rangeNum = round(random.uniform(0.0, 99.9), 1)
+	#print("Random Range = ",rangeNum, '\n')
 
 
 
 	for chromObj in liChromObj:
-		print("This is the chromosomes range ",chromObj.rangeMin, '-',chromObj.rangeMax)
+		#print("This is the chromosomes range ",chromObj.rangeMin, '-',chromObj.rangeMax)
 		if(chromObj.rangeMin <= rangeNum < chromObj.rangeMax):
 			return chromObj;
 
 	#if it doesn't find any chromosomes in the range, then we got a problem, so handle it
 	problem = Chromosome()
 	problem.name = "I'm not supposed to exist"
+	problemDetected = True
+	if(problemDetected):
+		print("#########WE GOT A PROBLEM OVER HERE in SELECTMATE FUNCTION")
+		print("This is the range num it picked", rangeNum)
+		for chromObj in liChromObj:
+			print("This is the chromosomes range ",chromObj.rangeMin, '-',chromObj.rangeMax)
+			
 	return problem;	
 
+
+#Open File
 def openCNFFile(fileName):
 	inFile = open(fileName, "r")
 	CNF = inFile.readline()
 	inFile.close()
 
-	# Reformat the CNF so it's easy to parse
-
-	#remove any newline characters, parentheses, and white space
 	CNF = CNF.rstrip('\n')
-	CNF = CNF.replace('(', '').replace(')', '').replace(' ', '')
 
 	return CNF;
 
  
-    
-### CLASSES ####
-class Chromosome:
-	def _init_(self):
-		self.name = ''
-		self.bitPattern = ''
-		self.fitnessValue = 0
-		self.fitnessRatio = 0
-		self.rangeMin = 0
-		self.rangeMax = 0
-	def crossover(self, start, end):
-		return self.bitPattern[start:end]
-
-
 def GeneticAlgorithm():
 	random.seed()
 
 	#open the file that contains example CNF inputs for the Genetic Algorithm
-	#fileName = input("Please enter the file name that contains the CNF: ")
 
-	###WILL DON"T FORGET TO CHANGE THIS FOR LANCE in case he has a different test file
+	###FOR LANCE, in case you have a different file
+
+	#fileName = input("Please enter the file name that contains the CNF: ")
+	#CNF = openCNFFile(fileName)
+
 	CNF = openCNFFile("GA.input")
+	
+	# Reformat the CNF so it's easy to parse
+
+	#remove any newline characters, parentheses, and white space
+	originalCNF = CNF
+	CNF = CNF.replace('(', '').replace(')', '').replace(' ', '')
 
 	#print("This is the CNF without parentheses or whitespace: ",CNF)
 	#print()
@@ -122,8 +143,6 @@ def GeneticAlgorithm():
 
 
 
-
-
 	# Alright let's make an initial random population that is the first generation
 	# Let's make an array to hold the size of the population
 	# and put in each element the random chromosome
@@ -144,14 +163,6 @@ def GeneticAlgorithm():
 
 	    #place the chromsome in the array
 	    arrChromObj[i].bitPattern = chromosomeBP
-    
-	#print("This is the first generation of chromosomes:\n")
-
-	#for i in range(0, len(arrChromObj)):
-	#	print(arrChromObj[i].bitPattern)
-
-
-
 
 
 	#Iterate through each member of the population until you find one that has a fitness value
@@ -160,6 +171,7 @@ def GeneticAlgorithm():
 	#Translate the CNF so it can be evaluated by python's function eval
 	CNF = CNF.replace('!',' not ').replace('+', ' or ')
 
+	#Initialize some variables
 	fVMatches = 0
 	oldPopTotalFV = 0
 	generationNum = 0
@@ -208,6 +220,9 @@ def GeneticAlgorithm():
 			#doing because we've found a solution! No use in doing extra work
 			if(FV == chromFV):
 				#output the truth values
+				if(generationNum == 0):
+					print("We found a solution in a randomly populated member of our first generation ")
+
 				print("We found a solution.  Here's the bit pattern of the solution followed by the truth values\n")
 				print("Chromosome Bit Pattern = \n", chromosome.bitPattern)
 				print(outputIfSuccess)
@@ -288,10 +303,12 @@ def GeneticAlgorithm():
 		rangeStart = 0
 
 		for i in range(len(arrChromObj)):
-			FR = float("{0:.1f}".format((arrChromObj[i].fitnessValue / popTotalFV) * 100))
+			FR = float((arrChromObj[i].fitnessValue / popTotalFV) * 100)
 			arrChromObj[i].fitnessRatio = FR
+			#print("This is the fitness ratio", arrChromObj[i].fitnessRatio)
 			arrChromObj[i].rangeMin = rangeStart
 			arrChromObj[i].rangeMax = rangeStart + FR
+			#print("This is the chromosomes range ",arrChromObj[i].rangeMin, '-',arrChromObj[i].rangeMax)
 			rangeStart += FR
 
 		# Print Header
@@ -319,14 +336,7 @@ def GeneticAlgorithm():
 		while(reprodCount <= totalNumReproductions):
 			#pick a pair of chromosomes for crossover reproduction
 
-			maleChrom = Chromosome()
-			femaleChrom = Chromosome()
-
-			selectedMate = selectMate(arrChromObj)
-			print("THIS IS THE name of the SELECTED MATE", selectedMate.name, '\n')
-			maleChrom.bitPattern = selectedMate.bitPattern#selectMate(arrChromObj).bitPattern
-			maleChrom.name = selectedMate.name
-
+			maleChrom = selectMate(arrChromObj)
 			femaleChrom = selectMate(arrChromObj)
 
 			#you don't want it mating with itself
@@ -341,31 +351,26 @@ def GeneticAlgorithm():
 			randXoverPnt = random.randrange(1, numOfGenes)  
 			#print("This is the index of crossover ", randXoverPnt)
 	
-			lHSMale = maleChrom.crossover(0,randXoverPnt)#maleChrom.bitPattern[0:randXoverPnt]
+			lHSMale = maleChrom.bitPattern[0:randXoverPnt]
 			rHSMale = maleChrom.bitPattern[randXoverPnt: numOfGenes]
 
 			lHSFemale = femaleChrom.bitPattern[0:randXoverPnt]
 			rHSFemale = femaleChrom.bitPattern[randXoverPnt: numOfGenes]
 			
-			offspring1bitPattern = lHSMale + rHSFemale
-			offspring2bitPattern = rHSMale + lHSFemale
-
-			#print("This is the bit pattern for offspring 1",offspring1bitPattern)
-			#print("This is the bit pattern for offspring 2",offspring2bitPattern)
 
 			offspring1 = Chromosome()
 			offspring1.name = "C" + str(chromosomeCount)
 			offspring1.bitPattern = lHSMale + rHSFemale
-	
-			chromosomeCount +=1
 
 			newGen.append(offspring1)
 	
 			offspring2 = Chromosome()
 			offspring2.name = "C" + str(chromosomeCount)
 			offspring2.bitPattern = rHSMale + lHSFemale
-		
-			chromosomeCount +=1
+
+			#print("This is the bit pattern for offspring 1",offspring1.bitPattern)
+			#print("This is the bit pattern for offspring 2",offspring2.bitPattern)
+			chromosomeCount += 2
 
 			newGen.append(offspring2)
 
@@ -375,11 +380,12 @@ def GeneticAlgorithm():
 		arrChromObj = newGen
 		generationNum += 1
 
-		if(generationNum > 100):
-			print("The CNF", CNF, "has no solution")
+		if(generationNum > 150):
+			print("\nThe CNF: \n\n", "'" +  originalCNF + "'","\n\n has no solution\n")
 			return;
 		
 
+###MAIN########
 GeneticAlgorithm()
 
     	
