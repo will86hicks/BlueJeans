@@ -146,10 +146,14 @@ def GeneticAlgorithm():
 
 	fVMatches = 0
 	oldPopTotalFV = 0
+	generationNum = 0
 	while(True):
-	
+		#output what generation we're currently on
+		print("Generation Number = \n", generationNum)
+		
 		#Start the total FV out at zero
 		popTotalFV = 0
+		
 		arrayChromFV=[]
 
 		chromNum = 1
@@ -177,15 +181,16 @@ def GeneticAlgorithm():
 				chromFV += eval(disjunctValue)
 			chromosome.fitnessValue = chromFV
     
-			print("This is how many truth values chromosome", chromosome.name + "(" + chromosome.bitPattern + ")", "yielded: ", chromFV)
+			#print("This is how many truth values chromosome", chromosome.name + "(" + chromosome.bitPattern + ")", "yielded: ", chromFV)
 
 			#If the chromosome's fitness value is equal to our GOAL fitness Value, we might as well stop what we're
 			#doing because we've found a solution!
 			if(FV == chromFV):
 				#output the truth values
+				print("Chromosome Bit Pattern = \n", chromosome.bitPattern)
 				print(outputIfSuccess)
 				#Exit the program
-				print("########The program should have ended######")
+				#print("########The program should have ended######")
 				return;
 
 		        
@@ -296,13 +301,13 @@ def GeneticAlgorithm():
 			while(maleChrom.name == femaleChrom.name):
 				femaleChrom = selectMate(arrChromObj)
 	
-			print("The male member of the population selected for reproduction is\n", maleChrom.name)
-			print("The female member of the population selected for reproduction is\n", femaleChrom.name)
+			#print("The male member of the population selected for reproduction is\n", maleChrom.name)
+			#print("The female member of the population selected for reproduction is\n", femaleChrom.name)
 
 
 			##Select crossover point
 			randXoverPnt = random.randrange(1, numOfGenes)  
-			print("This is the index of crossover ", randXoverPnt)
+			#print("This is the index of crossover ", randXoverPnt)
 	
 			lHSMale = maleChrom.bitPattern[0:randXoverPnt]
 			rHSMale = maleChrom.bitPattern[randXoverPnt: numOfGenes]
@@ -313,8 +318,8 @@ def GeneticAlgorithm():
 			offspring1bitPattern = lHSMale + rHSFemale
 			offspring2bitPattern = rHSMale + lHSFemale
 
-			print("This is the bit pattern for offspring 1",offspring1bitPattern)
-			print("This is the bit pattern for offspring 2",offspring2bitPattern)
+			#print("This is the bit pattern for offspring 1",offspring1bitPattern)
+			#print("This is the bit pattern for offspring 2",offspring2bitPattern)
 
 			offspring1 = Chromosome()
 			offspring1.name = "C" + str(chromosomeCount)
@@ -336,6 +341,8 @@ def GeneticAlgorithm():
 	
 		#Replace old generation with new generation and repeat for next generation until solution is found
 		arrChromObj = newGen
+		generationNum += 1
+		
 
 GeneticAlgorithm()
 
