@@ -25,7 +25,7 @@ def calcPopSize(numDVars, prop):
 #Select random chromosome for reproduction
 def selectMate(liChromObj):
 	rangeNum = round(random.uniform(0.0, 100.0), 1)#randrange(0, 100)
-	print("Random Range = ",rangeNum, '\n')
+	#print("Random Range = ",rangeNum, '\n')
 
 	rangeNum = rangeNum 
 
@@ -149,7 +149,7 @@ def GeneticAlgorithm():
 	generationNum = 0
 	while(True):
 		#output what generation we're currently on
-		print("Generation Number = \n", generationNum)
+		print("\nGeneration Number =", generationNum,"\n")
 		
 		#Start the total FV out at zero
 		popTotalFV = 0
@@ -187,6 +187,7 @@ def GeneticAlgorithm():
 			#doing because we've found a solution!
 			if(FV == chromFV):
 				#output the truth values
+				print("We found a solution.  Here's the bit pattern of the solution followed by the truth values\n")
 				print("Chromosome Bit Pattern = \n", chromosome.bitPattern)
 				print(outputIfSuccess)
 				#Exit the program
