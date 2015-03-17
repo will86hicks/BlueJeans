@@ -42,6 +42,13 @@ def openCNFFile(fileName):
 	inFile = open(fileName, "r")
 	CNF = inFile.readline()
 	inFile.close()
+
+	# Reformat the CNF so it's easy to parse
+
+	#remove any newline characters, parentheses, and white space
+	CNF = CNF.rstrip('\n')
+	CNF = CNF.replace('(', '').replace(')', '').replace(' ', '')
+
 	return CNF;
     
 ### CLASSES ####
@@ -54,36 +61,27 @@ class Chromosome:
         rangeMax = 0
 
 def GeneticAlgorithm():
+
 	#open the file that contains example CNF inputs for the Genetic Algorithm
+	#fileName = input("Please enter the file name that contains the CNF: ")
 
-#	inFile = open("GA.input", "r")
-#	CNF = inFile.readline()
-#	print("This is the original CNF read from the file:", CNF)
+	###WILL DON"T FORGET TO CHANGE THIS FOR LANCE in case he has a different test file
+	CNF = openCNFFile("GA.input")
 
-	#close the file
-#	inFile.close()
+	#print("This is the CNF without parentheses or whitespace: ",CNF)
+	#print()
 
-	fileName = input("Please enter the file name that contains the CNF: ")
-	CNF = openCNFFile(fileName)
 
-	# Reformat the CNF so it's easy to parse
 
-	#remove any newline characters, parentheses, and white space
-	CNF = CNF.rstrip('\n')
-	CNF = CNF.replace('(', '').replace(')', '').replace(' ', '')
-
-	print("This is the CNF without parentheses or whitespace: ",CNF)
-	print()
-
-	#Find the number of distinct variables(
-	liDistinctVars = CNF.replace('!', '')
+	###FIND DISTINCT VARIABLES(NUMBER OF GENES)
 
 	#using the imported regular expression libray, whittle down the CNF to only the single letter variables
-	liDistinctVars = re.split('\W+', liDistinctVars)
+	liDistinctVars = re.split('\W+', CNF)
 
+	#Set returns an unordered list of unique subsets, so let's reorder it alphabetically
 	liDistinctVars = sorted(list(set(liDistinctVars)))
 
-	print("This is the list of distinct variables: ", liDistinctVars, "\n")
+	#print("This is the list of distinct variables: ", liDistinctVars, "\n")
 
 
 
@@ -93,7 +91,7 @@ def GeneticAlgorithm():
 	disjCNF = CNF.split('*')
 	FV = len(disjCNF)
 
-	print("Fitness Value = ",FV,"\n")
+	print("Goal Fitness Value = ",FV,"\n")
 
 	# Number of Genes/Bits(size of chromosome)
 	numDistinctVars = len(liDistinctVars)
@@ -102,9 +100,9 @@ def GeneticAlgorithm():
 	print("The number of bits/genes in each chromosome = ", numOfGenes, "\n")
 
 	# Population size is usually number of bits, but play with the size to
-	# see what converges faster.  As per Dr. Radle's suggestion, the size of the population should be half the number of variables
-	# or a quarter the size when you get to hight numbers of variables
-	# Note: You always want an even population number
+	# see what converges faster.  As per Dr. Radle's suggestion, the size of the population should be half or a quarter
+	# the number of distinct variables
+	# Note: You always want an even population number for reproduction's sake
 
 	if(numDistinctVars > 0 or numDistinctVars < 16):
 	    popSize = calcPopSize(numDistinctVars, 2)
@@ -128,6 +126,7 @@ def GeneticAlgorithm():
 	    x = Chromosome()
 	    arrChromObj.append(x)
 
+	# For each member of the population, create a random bit pattern
 	for i in range(popSize):
 	    chromosomeBP = ""
     
@@ -137,23 +136,26 @@ def GeneticAlgorithm():
 	    #place the chromsome in the array
 	    arrChromObj[i].bitPattern = chromosomeBP
     
-	print("This is the first generation of chromosomes:\n")
+	#print("This is the first generation of chromosomes:\n")
 
-	for i in range(0, len(arrChromObj)):
-		print(arrChromObj[i].bitPattern)
+	#for i in range(0, len(arrChromObj)):
+	#	print(arrChromObj[i].bitPattern)
 
-	
-	### Can this be moved up ??
+
+
+
+
+	#Iterate through each member of the population until you find one that has a fitness value
+	#that matches our goal fitness value.  When this happens.  The function will return.
 
 	#Translate the CNF so it can be evaluated by python's function eval
 	CNF = CNF.replace('!',' not ').replace('+', ' or ')
 
-#Iterate through each member of the population until you find one that has a fitness value
-#that matches our goal fitness value.  When this happens.  The function will return.
-
 	fVMatches = 0
 	oldPopTotalFV = 0
 	generationNum = 0
+
+	#Infinite Loop until solution is found
 	while(True):
 		#output what generation we're currently on
 		print("\nGeneration Number =", generationNum,"\n")
@@ -164,6 +166,7 @@ def GeneticAlgorithm():
 		arrayChromFV=[]
 
 		chromNum = 1
+
 		for chromosome in arrChromObj:
 			chromosome.name = "C" + str(chromNum) # Start off with C1, not C0
 			tempCNF = CNF
@@ -174,6 +177,7 @@ def GeneticAlgorithm():
 				#print("This is the letter variable", varLetter)
 				bitValue = chromosome.bitPattern[i]
 				#print("this is the bitvalue: ", bitValue)
+				# Let's remember the truth values in case it's a solution
 				outputIfSuccess += varLetter + '=' + bitValue + '\n'
 				tempCNF= tempCNF.replace(varLetter, bitValue)
 
@@ -184,6 +188,7 @@ def GeneticAlgorithm():
 			# Evaluate the fitness value of each member of the population.  Fitness value is how many disjuncts evaluate to 			true.  The fittest member is the one closest to the total number of disjuncts
 			
 			chromFV = 0
+
 			for disjunctValue in tempCNF:
 				chromFV += eval(disjunctValue)
 			chromosome.fitnessValue = chromFV
@@ -191,19 +196,19 @@ def GeneticAlgorithm():
 			#print("This is how many truth values chromosome", chromosome.name + "(" + chromosome.bitPattern + ")", "yielded: ", chromFV)
 
 			#If the chromosome's fitness value is equal to our GOAL fitness Value, we might as well stop what we're
-			#doing because we've found a solution!
+			#doing because we've found a solution! No use in doing extra work
 			if(FV == chromFV):
 				#output the truth values
 				print("We found a solution.  Here's the bit pattern of the solution followed by the truth values\n")
 				print("Chromosome Bit Pattern = \n", chromosome.bitPattern)
 				print(outputIfSuccess)
+
 				#Exit the program
-				#print("########The program should have ended######")
 				return;
 
 		        
         		
-			#If we haven't found a success we'll have to determine it's fitness ratio for reproduction selection
+			#If we haven't found a success yet, we'll have to determine it's fitness ratio for reproduction selection
 			popTotalFV += chromFV
 		
 			arrayChromFV.append(chromFV)
