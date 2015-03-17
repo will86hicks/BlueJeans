@@ -50,6 +50,8 @@ def openCNFFile(fileName):
 	CNF = CNF.replace('(', '').replace(')', '').replace(' ', '')
 
 	return CNF;
+
+ 
     
 ### CLASSES ####
 class Chromosome:
@@ -162,8 +164,6 @@ def GeneticAlgorithm():
 		
 		#Start the total FV out at zero
 		popTotalFV = 0
-		
-		arrayChromFV=[]
 
 		chromNum = 1
 
@@ -211,15 +211,14 @@ def GeneticAlgorithm():
 			#If we haven't found a success yet, we'll have to determine it's fitness ratio for reproduction selection
 			popTotalFV += chromFV
 		
-			arrayChromFV.append(chromFV)
-		
 			chromNum += 1
 
 
-		###CHECK FOR PLATEAU EFFECT HERE ####
+		###CHECK FOR PLATEAU EFFECT ####
 		if(popTotalFV == oldPopTotalFV):
 			fVMatches += 1
 			if(fVMatches > 5):
+				print("Plateua effect detected\n")
 				#Mutate one member of the population
 				memberMutatorNum = random.randrange(0, popSize)
 				geneMutatorNum = random.randrange(0, numOfGenes)
@@ -254,7 +253,7 @@ def GeneticAlgorithm():
 
 				popTotalFV += chromFV
     
-				print("This is how many truth values chromosome", chromosome.name + "(" + chromosome.bitPattern + ")", "yielded: ", chromFV)
+				#print("This is how many truth values chromosome", chromosome.name + "(" + chromosome.bitPattern + ")", "yielded: ", chromFV)
 
 				#If the chromosome's fitness value is equal to our GOAL fitness Value, we might as well stop what we're
 				#doing because we've found a solution!
@@ -262,24 +261,18 @@ def GeneticAlgorithm():
 					#output the truth values
 					print(outputIfSuccess)
 					#Exit the program
-					print("########The program should have ended######")
 					return;
 
+				#Reset the number of matches
 				fVMatches = 0
 				
 		oldPopTotalFV = popTotalFV
-		# Calculate the fitness ratio of each chromosome
-		#arrChromFR = []
+
+
+
+
+	   ###CALCULATE FITNESS RATIO of each chromosome for reproduction selection###
 		rangeStart = 0
-
-		#for chromFV in arrChromObj:
-		#	chromFR = float("{0:.1f}".format((chromFV.fitnessValue / popTotalFV) * 100)) # Let's have it out of 100 to one decimal place
-			#arrChromFR.append(chromFR)
-			
-		#for chromFV in arrayChromFV:
-		#	chromFR = float("{0:.1f}".format((chromFV / popTotalFV) * 100)) # Let's have it out of 100 to one decimal place
-		#	arrChromFR.append(chromFR)
-
 
 		for i in range(len(arrChromObj)):
 			FR = float("{0:.1f}".format((arrChromObj[i].fitnessValue / popTotalFV) * 100))
@@ -298,7 +291,12 @@ def GeneticAlgorithm():
         
 			print("{0:24}{1:16}{2:8}{3:16.2f}{4:10}".format(chromObj.name,chromObj.bitPattern,chromObj.fitnessValue,chromObj.fitnessRatio,"               " + stringRange))
 
-		###REPRODUCE###
+
+
+
+
+
+           ###REPRODUCE###
 		totalNumReproductions = popSize / 2
 
 		reprodCount = 0
